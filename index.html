@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SnapTube Web - الشامل والمحدث</title>
+    <style>
+        :root {
+            --primary: #ff3b30;
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --success: #10b981;
+            --secondary: #3b82f6;
+            --platform-color: #8b5cf6;
+            --playlist-color: #ec4899;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 16px;
+        }
+
+        header {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            margin-top: 6px;
+            font-size: 0.9rem;
+        }
+
+        /* صندوق أزرار البلاي ليست والتحميل المتقدم في البداية */
+        .playlist-header-box {
+            width: 100%;
+            max-width: 650px;
+            background: rgba(236, 72, 153, 0.12);
+            border: 1px solid var(--playlist-color);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+            text-align: center;
+        }
+
+        .playlist-header-title {
+            font-size: 0.95rem;
+            color: #f472b6;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .playlist-buttons-grid {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .playlist-btn {
+            background: var(--playlist-color);
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            flex: 1;
+            min-width: 240px;
+            text-align: center;
+            transition: 0.2s;
+            display: inline-block;
+            cursor: pointer;
+            border: none;
+        }
+
+        .playlist-btn:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 650px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+            margin-bottom: 20px;
+        }
+
+        .input-box {
+            position: relative;
+            width: 100%;
+            margin-bottom: 12px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 14px 14px 14px 125px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            font-size: 0.95rem;
+            outline: none;
+            text-align: left;
+            direction: ltr;
+        }
+
+        input[type="text"]::placeholder {
+            text-align: right;
+            direction: rtl;
+            color: var(--text-muted);
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--primary);
+        }
+
+        .input-actions {
+            position: absolute;
+            left: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            gap: 6px;
+        }
+
+        .btn-action {
+            background: var(--card-bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-action:active {
+            transform: scale(0.95);
+        }
+
+        .btn-clear {
+            color: #ff8a80;
+            border-color: rgba(255, 59, 48, 0.4);
+        }
+
+        .btn-fetch {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            display: block;
+        }
+
+        .btn-fetch:active {
+            transform: scale(0.98);
+        }
+
+        .error-msg {
+            display: none;
+            background: rgba(255, 59, 48, 0.2);
+            border: 1px solid var(--primary);
+            color: #ff8a80;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 14px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .result-section {
+            display: none;
+            margin-top: 20px;
+            border-top: 1px solid var(--border);
+            padding-top: 20px;
+        }
+
+        .video-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .video-info img {
+            width: 100%;
+            max-width: 240px;
+            height: 135px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .video-details h3 {
+            font-size: 1rem;
+            margin-bottom: 4px;
+            line-height: 1.4;
+        }
+
+        .video-details p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .servers-box {
+            background: rgba(59, 130, 246, 0.12);
+            border: 1px solid var(--secondary);
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .servers-box p {
+            font-size: 0.85rem;
+            margin-bottom: 12px;
+            color: #93c5fd;
+            font-weight: 600;
+        }
+
+        .server-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .server-btn {
+            background: var(--secondary);
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-align: center;
+            transition: 0.2s;
+            display: inline-block;
+        }
+
+        .server-btn:hover {
+            opacity: 0.9;
+        }
+
+        .extractor-tool-box {
+            background: rgba(139, 92, 246, 0.12);
+            border: 1px solid var(--platform-color);
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .extractor-tool-box p {
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+            color: #c4b5fd;
+            font-weight: 600;
+        }
+
+        .btn-extractor {
+            background: var(--platform-color);
+            color: #fff;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 11px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        .quality-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .quality-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .q-label {
+            display: block;
+            font-weight: 700;
+            font-size: 0.92rem;
+        }
+
+        .q-format {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        .btn-dl {
+            background: var(--success);
+            color: #fff;
+            padding: 9px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        /* قسم الـ 20 موقع تحميل إضافي */
+        .platforms-section {
+            width: 100%;
+            max-width: 650px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+        }
+
+        .platforms-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--secondary);
+            text-align: center;
+        }
+
+        .platforms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 8px;
+        }
+
+        .platform-link {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            text-decoration: none;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .platform-link:hover {
+            border-color: var(--secondary);
+            background: rgba(59, 130, 246, 0.1);
+        }
+    </style>
+
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <link rel="manifest" href="./manifest.json?v=v1792158296879">
+    <meta name="theme-color" content="#b772c0">
+    <link rel="apple-touch-icon" href="./icon-192.png?v=v1792158296879">
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js?v=v1792158296879')
+            .then(reg => console.log('SW Registered'))
+            .catch(err => console.log('SW Failed', err));
+        });
+      }
+    </script>
+</head>
+<body>
+
+    <header>
+        <div class="logo">⚡ SnapTube Web الشامل</div>
+        <p class="subtitle">تحميل الفيديوهات والصوتيات مع 10 سيرفرات تحميل مباشرة وقوائم التشغيل</p>
+    </header>
+
+    <!-- أزرار البلاي ليست المربوطة بنسخ الرابط تلقائياً -->
+    <div class="playlist-header-box">
+        <div class="playlist-header-title">🎵 خيارات قوائم التشغيل والتحميل المتقدم (Playlist):</div>
+        <div class="playlist-buttons-grid">
+            <button type="button" class="playlist-btn" onclick="openAndCopyPlaylist(1)">📂 GenYouTube Playlist (سيرفر 1)</button>
+            <button type="button" class="playlist-btn" onclick="openAndCopyPlaylist(2)">📥 YouTube Multi Downloader (سيرفر 2)</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="input-box">
+            <input type="text" id="ytUrl" placeholder="ضع رابط فيديو يوتيوب هنا..." onkeydown="if(event.key === 'Enter') analyzeVideo()">
+            <div class="input-actions">
+                <button type="button" class="btn-action" onclick="pasteLink()">لصق</button>
+                <button type="button" class="btn-action btn-clear" onclick="clearLink()">مسح</button>
+            </div>
+        </div>
+
+        <button type="button" class="btn-fetch" onclick="analyzeVideo()">تحليل الرابط</button>
+
+        <div class="error-msg" id="errorMsg">يرجى إدخال رابط يوتيوب صحيح!</div>
+
+        <div class="result-section" id="resultSection">
+            <div class="video-info">
+                <img id="videoThumb" src="" alt="صورة الفيديو">
+                <div class="video-details">
+                    <h3 id="videoTitle">جاري جلب اسم الفيديو...</h3>
+                    <p id="videoAuthor">يوتيوب</p>
+                </div>
+            </div>
+
+            <!-- أداة استخراج الفيديو المباشر -->
+            <div class="extractor-tool-box">
+                <p>🎬 أداة استخراج ورصد روابط الفيديو المباشرة:</p>
+                <button type="button" class="btn-extractor" onclick="runExtractorTool()">تشغيل أداة استخراج ورصد الفيديو ⚡</button>
+            </div>
+
+            <div class="servers-box">
+                <p>اضغط على أي سيرفر بالأسفل للتحميل الفوري (10 سيرفرات مختلفة):</p>
+                <div class="server-links" id="directServers"></div>
+            </div>
+
+            <div class="tabs">
+                <button type="button" class="tab-btn active" id="tabVideo" onclick="switchTab('video')">🎬 فيديو (MP4)</button>
+                <button type="button" class="tab-btn" id="tabAudio" onclick="switchTab('audio')">🎵 صوت (MP3)</button>
+            </div>
+
+            <div id="videoQualities" class="quality-grid"></div>
+            <div id="audioQualities" class="quality-grid" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- قسم الـ 20 موقع تحميل إضافي -->
+    <div class="platforms-section">
+        <div class="platforms-title">🌐 20 موقع وسيرفر تحميل إضافي موثوق</div>
+        <div class="platforms-grid">
+            <a href="https://en.loader.to/" target="_blank" rel="noopener noreferrer" class="platform-link">Loader.to</a>
+            <a href="https://y2mate.is/" target="_blank" rel="noopener noreferrer" class="platform-link">Y2Mate.is</a>
+            <a href="https://savefrom.net" target="_blank" rel="noopener noreferrer" class="platform-link">SaveFrom.net</a>
+            <a href="https://ssyoutube.com" target="_blank" rel="noopener noreferrer" class="platform-link">SSYoutube</a>
+            <a href="https://y2meta.app" target="_blank" rel="noopener noreferrer" class="platform-link">Y2Meta.app</a>
+            <a href="https://x2download.com" target="_blank" rel="noopener noreferrer" class="platform-link">X2Download</a>
+            <a href="https://keepv.id" target="_blank" rel="noopener noreferrer" class="platform-link">KeepVid</a>
+            <a href="https://9convert.com" target="_blank" rel="noopener noreferrer" class="platform-link">9Convert</a>
+            <a href="https://no1s.biz" target="_blank" rel="noopener noreferrer" class="platform-link">No1S Downloader</a>
+            <a href="https://yt1s.com" target="_blank" rel="noopener noreferrer" class="platform-link">YT1s.com</a>
+            <a href="https://en.savefrom.net" target="_blank" rel="noopener noreferrer" class="platform-link">SaveFrom Alt</a>
+            <a href="https://catchvideo.net" target="_blank" rel="noopener noreferrer" class="platform-link">CatchVideo</a>
+            <a href="https://deturl.com" target="_blank" rel="noopener noreferrer" class="platform-link">DetURL</a>
+            <a href="https://tuberipper.com" target="_blank" rel="noopener noreferrer" class="platform-link">TubeRipper</a>
+            <a href="https://save.tube" target="_blank" rel="noopener noreferrer" class="platform-link">Save.Tube</a>
+            <a href="https://qdownloader.cc" target="_blank" rel="noopener noreferrer" class="platform-link">QDownloader</a>
+            <a href="https://videoder.com" target="_blank" rel="noopener noreferrer" class="platform-link">Videoder Web</a>
+            <a href="https://converto.io" target="_blank" rel="noopener noreferrer" class="platform-link">Converto.io</a>
+            <a href="https://flvto.biz" target="_blank" rel="noopener noreferrer" class="platform-link">FLVto</a>
+            <a href="https://MP3FY.com" target="_blank" rel="noopener noreferrer" class="platform-link">MP3FY</a>
+        </div>
+    </div>
+
+    <script>
+        function extractVideoID(url) {
+            if (!url) return null;
+            var match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?.*v=|embed\/|v\/|shorts\/|live\/))([a-zA-Z0-9_-]{11})/);
+            return match ? match[1] : null;
+        }
+
+        function pasteLink() {
+            var input = document.getElementById('ytUrl');
+            if (navigator.clipboard && navigator.clipboard.readText) {
+                navigator.clipboard.readText().then(function(text) {
+                    if (text) {
+                        input.value = text;
+                        analyzeVideo();
+                    }
+                }).catch(function() {
+                    input.focus();
+                });
+            } else {
+                input.focus();
+            }
+        }
+
+        function clearLink() {
+            var input = document.getElementById('ytUrl');
+            input.value = '';
+            document.getElementById('errorMsg').style.display = 'none';
+            document.getElementById('resultSection').style.display = 'none';
+            input.focus();
+        }
+
+        function analyzeVideo() {
+            var rawUrl = document.getElementById('ytUrl').value.trim();
+            var videoId = extractVideoID(rawUrl);
+            var errorMsg = document.getElementById('errorMsg');
+            var resultSection = document.getElementById('resultSection');
+
+            if (!videoId) {
+                errorMsg.style.display = 'block';
+                resultSection.style.display = 'none';
+                return;
+            }
+
+            errorMsg.style.display = 'none';
+
+            document.getElementById('videoThumb').src = 'https://i.ytimg.com/vi/' + videoId + '/hqdefault.jpg';
+            document.getElementById('videoTitle').textContent = 'فيديو يوتيوب جاهز للتحميل';
+            document.getElementById('videoAuthor').textContent = 'معرف الفيديو: ' + videoId;
+
+            buildButtons(videoId);
+            resultSection.style.display = 'block';
+
+            var cleanUrl = 'https://www.youtube.com/watch?v=' + videoId;
+            fetch('https://noembed.com/embed?url=' + encodeURIComponent(cleanUrl))
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    if (data && data.title) {
+                        document.getElementById('videoTitle').textContent = data.title;
+                    }
+                    if (data && data.author_name) {
+                        document.getElementById('videoAuthor').textContent = 'القناة: ' + data.author_name;
+                    }
+                })
+                .catch(function() {});
+        }
+
+        function openAndCopyPlaylist(type) {
+            var rawUrl = document.getElementById('ytUrl').value.trim();
+            if (!rawUrl) {
+                alert('⚠️ يرجى إدخال رابط يوتيوب في الخانة أولاً ليتم نسخه وتمريره للسيرفر!');
+                document.getElementById('ytUrl').focus();
+                return;
+            }
+
+            try {
+                navigator.clipboard.writeText(rawUrl);
+            } catch(e) {
+                var c = document.createElement('textarea');
+                c.value = rawUrl;
+                document.body.appendChild(c);
+                c.select();
+                try { document.execCommand('copy'); } catch(err) {}
+                document.body.removeChild(c);
+            }
+
+            var targetUrl = (type === 1) ? 'https://genyoutube.online/' : 'https://youtubemultidownloader.org/en/';
+            
+            window.open(targetUrl, '_blank');
+            alert('✅ تم نسخ رابط الفيديو إلى الحافظة!\n\nقم بالضغط مطولاً في خانة البحث بالموقع الذي سيفتح واختر "لصق" (Paste).');
+        }
+
+        function buildButtons(videoId) {
+            // إنشاء روابط الـ 10 سيرفرات المختلفة
+            var s1 = 'https://www.youtubepi.com/watch?v=' + videoId;
+            var s2 = 'https://www.ssyoutube.com/watch?v=' + videoId;
+            var s3 = 'https://y2meta.app/en/youtube/' + videoId;
+            var s4 = 'https://en.loader.to/api/button/?url=https://www.youtube.com/watch?v=' + videoId;
+            var s5 = 'https://y2mate.is/youtube/' + videoId;
+            var s6 = 'https://x2download.com/en/youtube/' + videoId;
+            var s7 = 'https://9convert.com/en/watch/' + videoId;
+            var s8 = 'https://yt1s.com/en/youtube-to-mp4/' + videoId;
+            var s9 = 'https://genyoutube.online/en1/url=https://www.youtube.com/watch?v=' + videoId;
+            var s10 = 'https://keepv.id/1/?url=https://www.youtube.com/watch?v=' + videoId;
+
+            document.getElementById('directServers').innerHTML =
+                '<a href="' + s1 + '" target="_blank" rel="noopener noreferrer" class="server-btn">🚀 سيرفر 1 (Y2Mate)</a>' +
+                '<a href="' + s2 + '" target="_blank" rel="noopener noreferrer" class="server-btn">⚡ سيرفر 2 (SaveFrom)</a>' +
+                '<a href="' + s3 + '" target="_blank" rel="noopener noreferrer" class="server-btn">📥 سيرفر 3 (Y2Meta)</a>' +
+                '<a href="' + s4 + '" target="_blank" rel="noopener noreferrer" class="server-btn">🔥 سيرفر 4 (Loader.to)</a>' +
+                '<a href="' + s5 + '" target="_blank" rel="noopener noreferrer" class="server-btn">💎 سيرفر 5 (Y2Mate.is)</a>' +
+                '<a href="' + s6 + '" target="_blank" rel="noopener noreferrer" class="server-btn">🌟 سيرفر 6 (X2Download)</a>' +
+                '<a href="' + s7 + '" target="_blank" rel="noopener noreferrer" class="server-btn">🎯 سيرفر 7 (9Convert)</a>' +
+                '<a href="' + s8 + '" target="_blank" rel="noopener noreferrer" class="server-btn">💫 سيرفر 8 (YT1s)</a>' +
+                '<a href="' + s9 + '" target="_blank" rel="noopener noreferrer" class="server-btn">🌐 سيرفر 9 (GenYouTube)</a>' +
+                '<a href="' + s10 + '" target="_blank" rel="noopener noreferrer" class="server-btn">⭐ سيرفر 10 (KeepVid)</a>';
+
+            var vFormats = [
+                { label: '1080p Full HD', size: '≈ 110 MB', link: s1 },
+                { label: '720p HD', size: '≈ 55 MB', link: s1 },
+                { label: '480p SD', size: '≈ 30 MB', link: s2 },
+                { label: '360p (سريع)', size: '≈ 15 MB', link: s2 }
+            ];
+
+            var aFormats = [
+                { label: 'MP3 جودة عالية (320kbps)', size: '≈ 8 MB', link: s3 },
+                { label: 'MP3 جودة متوسطة (128kbps)', size: '≈ 4 MB', link: s1 }
+            ];
+
+            var vHtml = '';
+            for (var i = 0; i < vFormats.length; i++) {
+                vHtml += '<div class="quality-card">' +
+                    '<div><span class="q-label">' + vFormats[i].label + '</span>' +
+                    '<span class="q-format">MP4 • ' + vFormats[i].size + '</span></div>' +
+                    '<a href="' + vFormats[i].link + '" target="_blank" rel="noopener noreferrer" class="btn-dl">تحميل ⬇</a>' +
+                    '</div>';
+            }
+            document.getElementById('videoQualities').innerHTML = vHtml;
+
+            var aHtml = '';
+            for (var j = 0; j < aFormats.length; j++) {
+                aHtml += '<div class="quality-card">' +
+                    '<div><span class="q-label">' + aFormats[j].label + '</span>' +
+                    '<span class="q-format">MP3 • ' + aFormats[j].size + '</span></div>' +
+                    '<a href="' + aFormats[j].link + '" target="_blank" rel="noopener noreferrer" class="btn-dl">تحميل ⬇</a>' +
+                    '</div>';
+            }
+            document.getElementById('audioQualities').innerHTML = aHtml;
+        }
+
+        function switchTab(type) {
+            var tabVideo = document.getElementById('tabVideo');
+            var tabAudio = document.getElementById('tabAudio');
+            var vGrid = document.getElementById('videoQualities');
+            var aGrid = document.getElementById('audioQualities');
+
+            if (type === 'video') {
+                tabVideo.className = 'tab-btn active';
+                tabAudio.className = 'tab-btn';
+                vGrid.style.display = 'grid';
+                aGrid.style.display = 'none';
+            } else {
+                tabVideo.className = 'tab-btn';
+                tabAudio.className = 'tab-btn active';
+                vGrid.style.display = 'none';
+                aGrid.style.display = 'grid';
+            }
+        }
+
+        function runExtractorTool() {
+            var rawUrl = document.getElementById('ytUrl').value.trim();
+            var videoId = extractVideoID(rawUrl);
+            
+            var links = new Set();
+            var regex = /(https?:\/\/[^"'\s<>]+?\.(?:mp4|m3u8|ts)[^"'\s<>]*)/ig;
+            
+            document.querySelectorAll('video, source').forEach(v => {
+                if (v.src && !v.src.startsWith('blob:')) links.add(v.src);
+            });
+
+            var html = document.documentElement.innerHTML;
+            var matchResult = html.match(regex);
+            if (matchResult) {
+                matchResult.forEach(m => links.add(m));
+            }
+
+            var arr = Array.from(links);
+            if (arr.length > 0) {
+                copyAndOpen(arr[0], '🎬 تم العثور على رابط الفيديو المباشر بنجاح!');
+                return;
+            }
+
+            if (videoId) {
+                var directTarget = 'https://www.ssyoutube.com/watch?v=' + videoId;
+                copyAndOpen(directTarget, '⚡ تم تحويلك مباشرة لخيارات التحميل المباشر للفيديو!');
+            } else {
+                alert('❌ يرجى إدخال أو تحليل رابط يوتيوب صحيح أولاً ليتم استخراج الروابط بدقة.');
+            }
+        }
+
+        function copyAndOpen(u, msg) {
+            var c = document.createElement('textarea');
+            c.value = u;
+            document.body.appendChild(c);
+            c.select();
+            try { document.execCommand('copy'); } catch(e) {}
+            document.body.removeChild(c);
+            try { navigator.clipboard.writeText(u); } catch(e) {}
+            window.open(u, '_blank');
+            alert(msg + '\n\n✅ تم نسخ الرابط وفتحه في تاب جديد بنجاح!');
+        }
+    </script>
+</body>
+</html>
